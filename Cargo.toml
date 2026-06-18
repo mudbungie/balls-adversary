@@ -1,0 +1,12 @@
+[package]
+name = "adversary"
+version = "0.1.0"
+edition = "2021"
+description = "A balls close.pre review gate: a single-pass adversarial review of a task's changes against its ball, run before delivery."
+license = "MIT"
+repository = "https://github.com/mudbungie/balls-adversary"
+
+# Cargo auto-discovers src/lib.rs (crate `adversary`) and src/main.rs (bin
+# `adversary`). The bin is a thin shell over the lib; all logic is unit-tested
+# in the lib, the bin's `main` is covered by the integration test running the
+# built binary (tarpaulin counts src/ only — see docs/design.md).
