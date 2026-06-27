@@ -3,6 +3,11 @@
 > Living document. The ball records the work; this file is the artifact. Edit
 > it like code as the design is attacked. References to `§N` are sections of the
 > balls spec (`docs/architecture.md` in the balls repo).
+>
+> This file is the **gate mechanics**. For the rubric-agnostic reframe
+> (completion vs quality is config) and the surrounding system the plugin does
+> not own — the autonomous loop, handoff, and the two grading holes — see
+> [`completion-gate.md`](completion-gate.md) (ball bl-c005).
 
 ## 1. What this is
 
