@@ -128,9 +128,20 @@ policy reading the ball — never a core field. Default: review every close.
   become an exit code — a trailing `PASS`/`FAIL` token, a small JSON envelope,
   a tool/stop-reason contract? Must be robust to a chatty model. (Pick the
   narrowest parse that can't false-pass.)
-- **Model / effort / prompt.** Which model, what review rubric, how much of the
-  ball (body vs full history) and diff (size cap?) to feed. Single-pass means
-  one shot — the prompt carries all the context.
+- **Review rubric — RESOLVED by [`completion-gate.md`](completion-gate.md) §1.**
+  The rubric is **not** a fixed prompt baked into the plugin; it is **owner
+  config** — a landing-committed plugin config in the plugin's own
+  `config/plugins/adversary/` territory (§1), travelling on `bl install`, never
+  XDG, never a core field. So the gate is **rubric-agnostic**, and *completion vs
+  quality* is the owner's choice, not a plugin opinion. Two holes from
+  completion-gate.md advance the rubric's open edges (cross-ref, not restated):
+  the rubric's **design principle** — let the pre-commit hook prove deterministic
+  facts, ask the LLM only for what judgment can settle — is §3 (Hole 1); and the
+  ball's **intent** (not just the diff) must reach the plugin so the grader checks
+  `criterion → intent`, §4 (Hole 2).
+- **Model / effort / prompt (still open).** Which model, how much of the ball
+  (body vs full history) and diff (size cap?) to feed. Single-pass means one
+  shot — the prompt carries all the context.
 - **Failure-mode policy.** If `claude` is unreachable / unauthenticated / times
   out, does the gate fail-open (pass, log a warning) or fail-closed (abort)?
   Fail-open keeps balls usable offline; fail-closed is a stricter gate. Likely a
