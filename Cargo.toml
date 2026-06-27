@@ -10,3 +10,9 @@ repository = "https://github.com/mudbungie/balls-adversary"
 # `adversary`). The bin is a thin shell over the lib; all logic is unit-tested
 # in the lib, the bin's `main` is covered by the integration test running the
 # built binary (tarpaulin counts src/ only — see docs/design.md).
+
+[dependencies]
+# §7 payload parse (the ball intent) and the plugin's own TOML config.
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"

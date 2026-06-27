@@ -124,10 +124,16 @@ policy reading the ball — never a core field. Default: review every close.
 
 ## 5. Open questions (attack these before building)
 
-- **Verdict wire.** Core reads only the exit code. How does `claude`'s answer
-  become an exit code — a trailing `PASS`/`FAIL` token, a small JSON envelope,
-  a tool/stop-reason contract? Must be robust to a chatty model. (Pick the
-  narrowest parse that can't false-pass.)
+- **Verdict wire — RESOLVED (bl-d014): default-deny single token.** Core reads
+  only the exit code, so the model's answer becomes one: the gate passes **iff
+  the final non-empty line of `claude`'s stdout is EXACTLY `REVIEW: PASS`**
+  (`src/review.rs::passes`). This is the narrowest parse that cannot false-pass —
+  trailing chatter after the token, a missing token, `REVIEW: FAIL`, or empty
+  output all read as FAIL — and it needs no JSON envelope or stop-reason
+  contract, so it stays robust to a chatty model. The full rationale rides
+  stderr (logged by balls); only the exit code returns to core. A *reachable*
+  model that does not say PASS is a definite FAIL (abort), distinct from
+  unreachability below.
 - **Review rubric — RESOLVED by [`completion-gate.md`](completion-gate.md) §1.**
   The rubric is **not** a fixed prompt baked into the plugin; it is **owner
   config** — a landing-committed plugin config in the plugin's own
@@ -139,14 +145,23 @@ policy reading the ball — never a core field. Default: review every close.
   facts, ask the LLM only for what judgment can settle — is §3 (Hole 1); and the
   ball's **intent** (not just the diff) must reach the plugin so the grader checks
   `criterion → intent`, §4 (Hole 2).
-- **Model / effort / prompt (still open).** Which model, how much of the ball
-  (body vs full history) and diff (size cap?) to feed. Single-pass means one
-  shot — the prompt carries all the context.
-- **Failure-mode policy.** If `claude` is unreachable / unauthenticated / times
-  out, does the gate fail-open (pass, log a warning) or fail-closed (abort)?
-  Fail-open keeps balls usable offline; fail-closed is a stricter gate. Likely a
-  config knob in the plugin's *own* territory (`config/plugins/adversary/`, §1),
-  never a core field.
+- **Model / effort / prompt — RESOLVED as owner config (bl-d014).** Model
+  (default `claude-opus-4-8`), reasoning effort (`high`), and the diff size cap
+  (`max_diff_bytes`) are knobs in the plugin's own config territory with safe
+  defaults; the single-pass prompt is assembled from the rubric + the ball
+  intent + the capped diff (`src/review.rs::build_prompt`). How much of the ball
+  to feed is settled by completion-gate.md §4 — the durable title/tags anchor,
+  not the skipped markdown body.
+- **Failure-mode policy — RESOLVED (bl-d014): fail-closed by default,
+  owner-configurable.** Spawn failure, a non-zero exit, a `timeout`-tripped kill,
+  or empty output are all `ClaudeOutcome::Unreachable` (the one case fail-mode
+  governs — a model that *answers* but does not pass is a FAIL, not
+  unreachability). The default is **fail-closed**: an unreachable model aborts the
+  close, because a gate that silently passes when it cannot run is no gate. The
+  `fail_open` knob in the plugin's own territory
+  (`config/plugins/adversary/config.toml`, §1) flips it for owners who would
+  rather keep balls usable offline. The timeout itself is `timeout_secs`, wired
+  via the `timeout` coreutil wrapping the `claude` call (`src/spawn.rs`).
 - **Cost / determinism.** One model call per close. Acceptable; note it.
 
 ## 6. Wiring summary

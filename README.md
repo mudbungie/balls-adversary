@@ -10,9 +10,12 @@ is itself a gate protocol: a non-zero exit aborts the op. So the gate is just
 "exit non-zero to refuse delivery"; the review write-up rides stderr (which
 balls envelopes into its log), and core parses nothing back.
 
-> Status: **scaffold.** The binary currently abstains (always exits 0) on every
-> op-phase, so wiring it in is safe but inert. The gate itself is the tracked
-> work — see [`docs/design.md`](docs/design.md).
+> Status: **working gate.** On `close pre` it reads the §7 payload, runs a
+> single-pass `claude` over `git diff main...HEAD` and the ball against the
+> owner's rubric, and exits 0 (pass) or non-zero (abort). Every other op-phase
+> abstains (exits 0). The verdict is default-deny — pass only if the model's
+> final line is exactly `REVIEW: PASS` — and an unreachable model fails **closed**
+> by default (owner-configurable). See [`docs/design.md`](docs/design.md).
 
 ## Install
 
