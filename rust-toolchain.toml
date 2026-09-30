@@ -1,0 +1,8 @@
+# The one home of the toolchain (bl-6d78). The gate is only reproducible if
+# every side resolves the same rustc: the noodlezoo builder image carries no
+# default toolchain — this file is what it installs — and `rustc -V` is the
+# gate half of every bl-speculate verdict key, so the string must be
+# byte-identical here and there. Bump it as a deliberate, isolated change.
+[toolchain]
+channel = "1.95.0"
+components = ["clippy", "rustfmt"]

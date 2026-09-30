@@ -30,10 +30,30 @@ deleting it removes config, not code.
 ## Develop
 
 ```sh
-make install-hooks    # clippy + 300-line cap + tests + 100% coverage gate
+make install-hooks    # once per clone: seat the pre-commit hook (below)
+make check            # the complete gate — what the builder runs
 make test
-make coverage         # needs cargo-tarpaulin
+make coverage         # cargo-tarpaulin; shimmed to refuse on this laptop
 ```
+
+## The gate
+
+`make check` is the complete gate: clippy `-D warnings`, tests, the 300-line
+cap, 100% line coverage (cargo-tarpaulin). The pre-commit hook
+(`scripts/pre-commit`, seated by `make install-hooks`) does not run it on this
+machine — this laptop does not compile in a gate, and `cargo tarpaulin` /
+`cargo llvm-cov` are shimmed here to refuse (ops bl-3166,
+`~/ops/remote-builds.md` "Phase 2"). The hook is `exec bl-gate` (userconf): it
+exports `BALLS_TOOLCHAIN`, asks `bl-speculate check` for a verified verdict on
+the staged tree, and otherwise has the noodlezoo builder run `make check` and
+sign one (`bl-remote-gate`, `~/ops/noodlezoo/docs/builder.md`). Exit 0 is a
+pass; 1 means the builder failed the tree (`ssh builder cat
+/tank/build/out/<sha>/log`); 75 means no verdict — nothing recorded, commit
+refused, never `cargo test` instead. `bl-remote-run <target>` runs any make
+target on the builder when you want tests before committing.
+`rust-toolchain.toml` pins the rustc every side resolves; `rustc -V` is the
+gate half of every verdict key, so the pin is what makes a builder's verdict
+land here.
 
 ## Verify against real claude (manual ritual)
 
